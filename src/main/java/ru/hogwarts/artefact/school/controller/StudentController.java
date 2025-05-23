@@ -4,10 +4,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import ru.hogwarts.artefact.school.model.Faculty;
 import ru.hogwarts.artefact.school.model.Student;
 import ru.hogwarts.artefact.school.services.StudentService;
 
 import java.util.Collection;
+
 @RestController
 @RequestMapping("student")
 public class StudentController {
@@ -18,7 +20,11 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<Collection<Student>> getAllStudent() {
+    public ResponseEntity<Collection<Student>> getAllStudent(@RequestParam(required = false) Integer startAge, @RequestParam(required = false) Integer endAge) {
+        if (startAge != null && endAge != null) {
+            return ResponseEntity.ok(studentService.findByAgeBetween(startAge, endAge));
+
+        }
         return ResponseEntity.ok(studentService.getAllStudents());
     }
 
@@ -39,7 +45,7 @@ public class StudentController {
 
     @PutMapping
     public ResponseEntity<Student> editStudent(@RequestBody Student student) {
-        Student renameStudent =studentService.editStudent(student);
+        Student renameStudent = studentService.editStudent(student);
         if (renameStudent == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -58,4 +64,16 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("{id}/faculty")
+    public ResponseEntity<Faculty> getStudentFaculty(@PathVariable Long id) {
+
+        Faculty faculty = studentService.getFacultyByStudent(id);
+        if (faculty == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(faculty);
+    }
+
+
 }

@@ -7,6 +7,8 @@ import ru.hogwarts.artefact.school.repositories.FacultyRepository;
 import ru.hogwarts.artefact.school.repositories.StudentRepository;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class FacultyService {
@@ -35,5 +37,16 @@ public class FacultyService {
     public Collection<Faculty> getAllFaculty() {
         return facultyRepository.findAll();
     }
+
+    // Service
+    public List<Faculty> findByName(String name) {
+        return facultyRepository.findByName(name);
+    }
+
+    public Collection<Student> getStudentsByFaculty(Long facultyId) {
+        Faculty faculty = facultyRepository.findById(facultyId).orElse(null);
+        return faculty != null ? faculty.getStudents() : Collections.emptyList();
+    }
+
 }
 

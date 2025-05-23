@@ -1,6 +1,7 @@
 package ru.hogwarts.artefact.school.services;
 
 import org.springframework.stereotype.Service;
+import ru.hogwarts.artefact.school.model.Faculty;
 import ru.hogwarts.artefact.school.model.Student;
 import ru.hogwarts.artefact.school.repositories.StudentRepository;
 
@@ -34,4 +35,12 @@ public class StudentService {
     public Collection<Student> getAllStudents() {
         return studentRepository.findAll();
     }
+    public Collection<Student> findByAgeBetween(Integer startAge, Integer endAge) {
+        return studentRepository.findByAgeBetween(startAge, endAge);
+    }
+    public Faculty getFacultyByStudent(Long studentId) {
+        Student student = studentRepository.findById(studentId).orElse(null);
+        return student != null ? student.getFaculty() : null;
+    }
+
 }
