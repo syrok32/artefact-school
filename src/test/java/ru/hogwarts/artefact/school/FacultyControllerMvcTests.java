@@ -25,7 +25,7 @@ import ru.hogwarts.artefact.school.repositories.FacultyRepository;
 import ru.hogwarts.artefact.school.services.FacultyService;
 
 import java.util.List;
-import java.util.Optional;
+
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebMvcTest(FacultyController.class)
 class FacultyControllerMvcTests {
 
@@ -90,7 +91,6 @@ class FacultyControllerMvcTests {
     }
 
     @Test
-
     void getFacultyInfoTest() throws Exception {
         Long id = 1L;
         Faculty faculty = new Faculty();
@@ -135,7 +135,6 @@ class FacultyControllerMvcTests {
 
 
     @Test
-
     void deleteFacultyTest() throws Exception {
         Long id = 1L;
 
@@ -144,7 +143,6 @@ class FacultyControllerMvcTests {
         mockMvc.perform(delete("/faculty/{id}", id))
                 .andExpect(status().isOk());
     }
-
 
 
 }
