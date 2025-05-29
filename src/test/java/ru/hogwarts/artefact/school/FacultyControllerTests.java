@@ -1,23 +1,18 @@
 package ru.hogwarts.artefact.school;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
-import ru.hogwarts.artefact.school.controller.FacultyController;
-import ru.hogwarts.artefact.school.controller.StudentController;
 import ru.hogwarts.artefact.school.model.Faculty;
-import ru.hogwarts.artefact.school.model.Student;
 import ru.hogwarts.artefact.school.repositories.FacultyRepository;
-import ru.hogwarts.artefact.school.services.FacultyService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class FacultyControllerTests {
@@ -25,60 +20,72 @@ public class FacultyControllerTests {
     private int port;
 
     @Autowired
-    private FacultyController facultyController;
-
-    @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private FacultyRepository facultyRepository;
 
-    @Test
-    public void testGetAllFaculty() throws Exception {
-        Assertions.assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/faculty", String.class)).isNotNull();
+    private String getUrl(String path) {
+        return "http://localhost:" + port + "/faculty" + path;
+    }
+
+    @BeforeEach
+    void setUp() {
+        // Очищаем базу
+        facultyRepository.deleteAll();
+
+        // Наполняем тестовыми данными
+        Faculty faculty = new Faculty();
+        faculty.setName("Hogwarts");
+        faculty.setColor("Green");
+        facultyRepository.save(faculty);
     }
 
     @Test
-    public void testCreateFaculty() throws Exception {
-        Faculty faculty = new Faculty();
-        faculty.setId(1L);
-        faculty.setName("BIBALearning");
-        faculty.setColor("blue");
-
-        Assertions.assertThat(this.restTemplate.postForObject("http://localhost:" + port + "/faculty", faculty, String.class)).isNotNull();
+    void testGetAllFaculty() {
+        ResponseEntity<Faculty[]> response = restTemplate.getForEntity(getUrl(""), Faculty[].class);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(response.getBody()).hasSize(1);
+        Assertions.assertThat(response.getBody()[0].getName()).isEqualTo("Hogwarts");
+        Assertions.assertThat(response.getBody()[0].getColor()).isEqualTo("Green");
     }
 
     @Test
-    public void testEditFaculty() throws Exception {
+    void testCreateFaculty() {
         Faculty faculty = new Faculty();
-        faculty.setName("Bobainfo");
-        faculty.setColor("yellow");
+        faculty.setName("Slytherin");
+        faculty.setColor("Silver");
 
-        Faculty createdFaculty = this.restTemplate.postForObject("http://localhost:" + port + "/faculty", faculty, Faculty.class);
-
-        createdFaculty.setName("UpdatedFaculty");
-        createdFaculty.setColor("Blue");
-
-        ResponseEntity<Faculty> response = this.restTemplate.exchange("http://localhost:" + port + "/faculty", org.springframework.http.HttpMethod.PUT, new org.springframework.http.HttpEntity<>(createdFaculty), Faculty.class);
-
+        ResponseEntity<Faculty> response = restTemplate.postForEntity(getUrl(""), faculty, Faculty.class);
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getBody().getId()).isNotNull();
+        Assertions.assertThat(response.getBody().getName()).isEqualTo("Slytherin");
+        Assertions.assertThat(response.getBody().getColor()).isEqualTo("Silver");
     }
 
     @Test
-    public void testDeleteFaculty() throws Exception {
-        Faculty faculty = new Faculty();
-        faculty.setName("BibaBoba");
-        faculty.setColor("purple");
+    void testEditFaculty() {
+        Faculty faculty = facultyRepository.findAll().get(0); // Получаем существующий факультет
+        faculty.setName("UpdatedHogwarts");
+        faculty.setColor("Blue");
 
-        Faculty createdFaculty = this.restTemplate.postForObject("http://localhost:" + port + "/faculty", faculty, Faculty.class);
+        ResponseEntity<Faculty> response = restTemplate.exchange(
+                getUrl(""), HttpMethod.PUT, new HttpEntity<>(faculty), Faculty.class);
 
-        this.restTemplate.delete("http://localhost:" + port + "/faculty/" + createdFaculty.getId());
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(response.getBody().getName()).isEqualTo("UpdatedHogwarts");
+        Assertions.assertThat(response.getBody().getColor()).isEqualTo("Blue");
+    }
 
-        ResponseEntity<Faculty> response = this.restTemplate.getForEntity("http://localhost:" + port + "/faculty/" + createdFaculty.getId(), Faculty.class);
+    @Test
+    void testDeleteFaculty() {
+        Faculty faculty = facultyRepository.findAll().get(0); // Получаем существующий факультет
+        Long id = faculty.getId();
+
+        restTemplate.delete(getUrl("/" + id));
+
+        ResponseEntity<Faculty> response = restTemplate.getForEntity(getUrl("/" + id), Faculty.class);
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }
-
-
-
-
-

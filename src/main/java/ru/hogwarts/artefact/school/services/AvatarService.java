@@ -2,6 +2,7 @@ package ru.hogwarts.artefact.school.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,8 +12,9 @@ import ru.hogwarts.artefact.school.repositories.AvatarRepository;
 import ru.hogwarts.artefact.school.repositories.StudentRepository;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.util.List;
 import java.awt.image.BufferedImage;
+import org.springframework.data.domain.Pageable;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,5 +77,11 @@ public class AvatarService {
     }
     public Avatar findAvatar(Long studentId) {
         return avatarRepository.findByStudentId(studentId).orElse(null);
+    }
+
+
+    public List<Avatar> getAllAvatar(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return avatarRepository.findAll(pageable).getContent();
     }
 }
