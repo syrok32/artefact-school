@@ -11,15 +11,14 @@ import ru.hogwarts.artefact.school.model.Student;
 import ru.hogwarts.artefact.school.repositories.AvatarRepository;
 import ru.hogwarts.artefact.school.repositories.StudentRepository;
 
-import javax.imageio.ImageIO;
 import java.util.List;
-import java.awt.image.BufferedImage;
+
+
 import org.springframework.data.domain.Pageable;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
@@ -30,7 +29,6 @@ public class AvatarService {
     private String avatarsDir;
 
 
-
     private final AvatarRepository avatarRepository;
     private final StudentRepository studentRepository;
 
@@ -38,6 +36,7 @@ public class AvatarService {
         this.avatarRepository = avatarRepository;
         this.studentRepository = studentRepository;
     }
+
     public void uploadAvatar(Long studentId, MultipartFile avatarFile) throws IOException {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Студент с id " + studentId + " не найден"));
@@ -75,6 +74,7 @@ public class AvatarService {
     private String getExtensions(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
+
     public Avatar findAvatar(Long studentId) {
         return avatarRepository.findByStudentId(studentId).orElse(null);
     }

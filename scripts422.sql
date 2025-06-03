@@ -11,7 +11,7 @@ CREATE TABLE Person (
     person_id INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     age INT NOT NULL,
-    has_license BOOLEAN NOT NULL,
+    has_license BOOLEAN NOT NULL,---+++----
     car_id INT,
     FOREIGN KEY (car_id) REFERENCES Car(car_id)
 );
